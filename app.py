@@ -3030,4 +3030,7 @@ def run_simple_tests():
 
 # Start server
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=3000) 
+    # Use a more compatible approach that avoids signal handling issues
+    from waitress import serve
+    print("Starting server on http://0.0.0.0:3000")
+    serve(app, host="0.0.0.0", port=3000) 
