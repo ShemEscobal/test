@@ -3032,5 +3032,24 @@ def run_simple_tests():
 if __name__ == "__main__":
     # Use a more compatible approach that avoids signal handling issues
     from waitress import serve
-    print("Starting server on http://0.0.0.0:3000")
-    serve(app, host="0.0.0.0", port=3000) 
+    import os
+    import socket
+    
+    # Try to get the port from environment variable or use an alternative port
+    port = int(os.environ.get('PORT', 8080))
+    
+    # Try to find an available port if the specified one is in use
+    max_attempts = 3
+    for attempt in range(max_attempts):
+        try:
+            print(f"Starting server on http://0.0.0.0:{port}")
+            serve(app, host="0.0.0.0", port=port)
+            break  # Successfully started, exit the loop
+        except OSError as e:
+            if "Address already in use" in str(e) and attempt < max_attempts - 1:
+                print(f"Port {port} is already in use, trying another port...")
+                port += 1  # Try the next port
+            else:
+                print(f"Failed to start server: {e}")
+                # If we've exhausted all attempts or got a different error, re-raise
+                raise
