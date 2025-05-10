@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Dashboard - Diagnostic Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        .card {
+            margin-bottom: 1rem;
+        }
+        .log-container {
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+        }
+        .log-entry {
+            margin: 0;
+            padding: 0.1rem 0;
+        }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .success { color: #198754; }
+        .info { color: #0d6efd; }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <h1 class="mb-4">IoT Dashboard Diagnostic Tool</h1>
+        
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> This tool helps diagnose and fix device display issues for user ShemEscobal.
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">User Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="userInfo">Loading...</div>
+                        <button id="checkUserBtn" class="btn btn-primary mt-3">
+                            <i class="bi bi-person-check"></i> Check User
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">Database Device Check</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="devicesInfo">Not checked yet</div>
+                        <button id="checkDevicesBtn" class="btn btn-success mt-3">
+                            <i class="bi bi-database-check"></i> Check Database Devices
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header bg-warning">
+                <h5 class="card-title mb-0">Fix Device Display</h5>
+            </div>
+            <div class="card-body">
+                <p>Click the button below to force the dashboard to display your devices:</p>
+                <button id="fixDevicesBtn" class="btn btn-warning">
+                    <i class="bi bi-tools"></i> Fix Device Display
+                </button>
+                <button id="goDashboardBtn" class="btn btn-outline-primary ms-2">
+                    <i class="bi bi-speedometer"></i> Go to Dashboard
+                </button>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="card-title mb-0">Diagnostic Log</h5>
+            </div>
+            <div class="card-body">
+                <div id="logContainer" class="log-container">
+                    <p class="log-entry info">Diagnostic tool initialized</p>
+                </div>
+                <button id="clearLogBtn" class="btn btn-secondary mt-3">
+                    <i class="bi bi-trash"></i> Clear Log
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Log function
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const entry = document.createElement('p');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        // Check if user is logged in
+        function checkUser() {
+            log('Checking user information...');
+            
+            const username = localStorage.getItem('username');
+            const userId = localStorage.getItem('userId');
+            const token = localStorage.getItem('token');
+            
+            const userInfo = document.getElementById('userInfo');
+            
+            if (!username || !userId || !token) {
+                userInfo.innerHTML = `
+                    <div class="alert alert-danger">
+                        Not logged in or missing credentials
+                    </div>
+                    <a href="/login" class="btn btn-primary">Go to Login</a>
+                `;
+                log('User not logged in or missing credentials', 'error');
+                return false;
+            }
+            
+            userInfo.innerHTML = `
+                <ul class="list-group">
+                    <li class="list-group-item"><strong>Username:</strong> ${username}</li>
+                    <li class="list-group-item"><strong>User ID:</strong> ${userId}</li>
+                    <li class="list-group-item"><strong>Has Token:</strong> ${token ? 'Yes' : 'No'}</li>
+                </ul>
+            `;
+            
+            log(`User info: ${username}, ID: ${userId}`, 'success');
+            return true;
+        }
+        
+        // Check devices in database via API
+        async function checkDevices() {
+            log('Checking database for devices...');
+            
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                log('No user ID found in localStorage', 'error');
+                return;
+            }
+            
+            const devicesInfo = document.getElementById('devicesInfo');
+            devicesInfo.innerHTML = `<div class="spinner-border text-primary" role="status"></div> Checking...`;
+            
+            try {
+                const serverUrl = localStorage.getItem('serverUrl') || window.location.origin;
+                const response = await fetch(`${serverUrl}/api/devices?user_id=${userId}`, {
+                    headers: {
+                        'Authorization': localStorage.getItem('token'),
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                log(`API response received: ${data.devices ? data.devices.length : 0} devices found`, 'info');
+                
+                if (data.devices && data.devices.length > 0) {
+                    let devicesList = `<div class="alert alert-success">Found ${data.devices.length} device(s)</div><ul class="list-group">`;
+                    
+                    data.devices.forEach(device => {
+                        devicesList += `
+                            <li class="list-group-item">
+                                <strong>Key:</strong> ${device.key}<br>
+                                <strong>IP:</strong> ${device.ipAddress || 'Unknown'}<br>
+                                <strong>Connected:</strong> ${device.isConnected ? 'Yes' : 'No'}
+                            </li>
+                        `;
+                    });
+                    
+                    devicesList += '</ul>';
+                    devicesInfo.innerHTML = devicesList;
+                    log(`Found ${data.devices.length} device(s) in database`, 'success');
+                } else {
+                    devicesInfo.innerHTML = `
+                        <div class="alert alert-warning">
+                            No devices found for this user in the database
+                        </div>
+                    `;
+                    log('No devices found in database', 'warning');
+                }
+            } catch (error) {
+                devicesInfo.innerHTML = `
+                    <div class="alert alert-danger">
+                        Error: ${error.message}
+                    </div>
+                `;
+                log(`Error checking devices: ${error.message}`, 'error');
+            }
+        }
+        
+        // Function to inject fix script into dashboard page
+        async function fixDevices() {
+            log('Creating fix script for device display...');
+            
+            try {
+                // Fetch the fix script content
+                const response = await fetch('fix_frontend.js');
+                if (!response.ok) {
+                    throw new Error(`Could not load fix script: ${response.status}`);
+                }
+                
+                const scriptContent = await response.text();
+                log('Fix script loaded successfully', 'success');
+                
+                // Store in localStorage for injection
+                localStorage.setItem('fix_script', scriptContent);
+                log('Fix script saved to localStorage for injection', 'info');
+                
+                // Create a test script element
+                const script = document.createElement('script');
+                script.textContent = scriptContent;
+                document.body.appendChild(script);
+                
+                log('Fix ready! Go to the dashboard to apply it.', 'success');
+            } catch (error) {
+                log(`Error setting up fix: ${error.message}`, 'error');
+            }
+        }
+        
+        // Button event listeners
+        document.getElementById('checkUserBtn').addEventListener('click', checkUser);
+        document.getElementById('checkDevicesBtn').addEventListener('click', checkDevices);
+        document.getElementById('fixDevicesBtn').addEventListener('click', fixDevices);
+        document.getElementById('clearLogBtn').addEventListener('click', () => {
+            document.getElementById('logContainer').innerHTML = '';
+            log('Log cleared', 'info');
+        });
+        document.getElementById('goDashboardBtn').addEventListener('click', () => {
+            window.location.href = 'user.html';
+        });
+        
+        // Check user on load
+        document.addEventListener('DOMContentLoaded', () => {
+            checkUser();
+        });
+    </script>
+</body>
+</html> 

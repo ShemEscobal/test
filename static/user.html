@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datapod Dashboard</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="bg-dark text-white">
+            <div class="sidebar-header p-3">
+                <img src="/static/images/logo.png" alt="Logo" class="logo-img img-fluid">
+                <h3 class="mt-2">DataPod</h3>
+            </div>
+
+            <ul class="list-unstyled components">
+                <li class="active">
+                    <a href="#" class="d-flex align-items-center p-3">
+                        <i class="bi bi-speedometer2 me-2"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="d-flex align-items-center p-3">
+                        <i class="bi bi-graph-up me-2"></i>
+                        Analytics
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="d-flex align-items-center p-3">
+                        <i class="bi bi-gear me-2"></i>
+                        Settings
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Page Content -->
+        <div id="content" class="content">
+            <!-- Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+                <div class="container-fluid">
+                    <button type="button" id="sidebarCollapse" class="btn btn-outline-dark">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <span class="navbar-brand ms-3">Datapod Dashboard</span>
+                    
+                    <div class="ms-auto d-flex align-items-center">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle"></i> <span id="loggedInUser"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="#" id="settingsBtn"><i class="bi bi-gear"></i> Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content Area -->
+            <div class="container-fluid p-4">
+                <!-- Status Alert -->
+                <div class="alert alert-primary text-center" id="statusDisplay">
+                    Loading your devices automatically...
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <!-- Your Devices Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-danger text-white">
+                                <span class="fs-5">Your Devices</span>
+                                <div class="float-end">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control form-control-sm" placeholder="Search devices..." id="searchDevices">
+                                        <button class="btn btn-outline-light btn-sm" type="button" id="filter">
+                                            <span class="dropdown-toggle">Filter</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Device Key</th>
+                                                <th>Label</th>
+                                                <th>Status</th>
+                                                <th>IP Address</th>
+                                                <th>Type</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="deviceSummaryBody">
+                                            <!-- Table will be populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        Showing <span id="paginationStart">1</span> to <span id="paginationEnd">1</span> of <span id="paginationTotal">1</span> devices
+                                    </div>
+                                    <nav aria-label="Devices navigation">
+                                        <ul class="pagination pagination-sm mb-0">
+                                            <li class="page-item disabled">
+                                                <a class="page-link" href="#">Previous</a>
+                                            </li>
+                                            <li class="page-item active">
+                                                <a class="page-link" href="#">1</a>
+                                            </li>
+                                            <li class="page-item disabled">
+                                                <a class="page-link" href="#">Next</a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <!-- Device Info Card -->
+                        <div id="deviceInfoCard" class="card mb-4 shadow-sm d-none">
+                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+                                <span class="fs-5">Device Information</span>
+                                <button class="btn btn-sm btn-light" id="refreshDeviceBtn">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </button>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="fs-5"><strong>Device ID:</strong> <span id="deviceId">Unknown</span></p>
+                                        <p class="fs-5"><strong>IP Address:</strong> <span id="deviceIp">Unknown</span></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="fs-5"><strong>Type:</strong> <span id="deviceType">IoTPod</span></p>
+                                        <p class="fs-5">
+                                            <strong>Status:</strong> <span id="deviceStatus" class="badge bg-secondary">Offline</span>
+                                            <div id="deviceStatusNote" class="mt-1">
+                                                <small class="text-muted">
+                                                    Status is determined by server heartbeat data.
+                                                </small>
+                                            </div>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <!-- Connection Status -->
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="card-title mb-0">Connection Status</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fs-5">Server Connection:</span>
+                                    <div class="connection-indicator">
+                                        <div id="serverConnectionIndicator" class="status-indicator connected"></div>
+                                    </div>
+                                </div>
+                                <div class="mt-2 mb-3">
+                                    <small class="text-muted">Server status is determined by device heartbeats sent to the server.</small>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="fs-5">Direct Connection:</span>
+                                    <div class="connection-indicator">
+                                        <div id="directConnectionIndicator" class="status-indicator disconnected"></div>
+                                    </div>
+                                </div>
+                                <div class="mt-2 mb-3">
+                                    <small class="text-muted">Direct connection is used for real-time device control. If unavailable, check your network configuration.</small>
+                                </div>
+                                    
+                                <div class="progress mt-3" style="height: 15px;">
+                                    <div id="connectionProgress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <!-- Control panel sidebar -->
+                    <div class="col-md-4">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-primary text-white py-3">
+                                <h5 class="card-title mb-0">Device Controls</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <!-- Status message instead of scan button -->
+                                <div class="alert alert-info py-2 mb-4">
+                                    <small><i class="bi bi-info-circle me-2"></i>Automatically displaying your registered devices</small>
+                                </div>
+
+                                <!-- Add button for direct connection -->
+                                <button id="directConnectBtn" class="btn btn-outline-primary w-100 mb-4 py-2">
+                                    <i class="bi bi-link-45deg me-2"></i> Direct Connect (IP)
+                                </button>
+                                
+                                <!-- LED Control -->
+                                <div class="led-control">
+                                    <h5 class="mb-3">LED Control</h5>
+                                    
+                                    <!-- Direct control buttons - now larger -->
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <button id="ledOnButton" class="btn btn-success w-100 py-4 mb-3" onclick="directToggleLed('on')">
+                                                <i class="bi bi-lightbulb-fill fs-4"></i><br>
+                                                <span class="fw-bold">ON</span>
+                                            </button>
+                                        </div>
+                                        <div class="col-6">
+                                            <button id="ledOffButton" class="btn btn-secondary w-100 py-4 mb-3" onclick="directToggleLed('off')">
+                                                <i class="bi bi-lightbulb fs-4"></i><br>
+                                                <span class="fw-bold">OFF</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- IP address info -->
+                                    <div id="deviceIPInfo" class="text-center mb-3 small text-muted">
+                                        <i class="bi bi-info-circle"></i> 
+                                        <span id="deviceConnectionStatusText">Select a device to connect</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <!-- Session Manager Script -->
+    <script src="/static/session_manager.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="/static/script.js"></script>
+    <!-- LED Control JavaScript -->
+    <script src="/static/led_control.js"></script>
+    <!-- Device Loader JavaScript -->
+    <script src="/static/device_loader.js"></script>
+    
+    <!-- Additional initialization script -->
+    <script>
+        // Ensure settings button works with jQuery and Bootstrap
+        $(document).ready(function() {
+            $('#settingsBtn').on('click', function(e) {
+                e.preventDefault();
+                $('#settingsModal').modal('show');
+                return false;
+            });
+            
+            // Make sure the logout button works
+            $('#logoutBtn').on('click', function(e) {
+                e.preventDefault();
+                if (typeof logoutUser === 'function') {
+                    logoutUser();
+                } else if (window.SessionManager && typeof window.SessionManager.logoutUser === 'function') {
+                    window.SessionManager.logoutUser();
+                } else {
+                    console.error("logoutUser function not found");
+                    // Fallback: clear localStorage and redirect
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    window.location.href = "/login";
+                }
+                return false;
+            });
+        });
+        
+        // Simple direct toggle function - no status check, just direct control
+        function directToggleLed(state) {
+            console.log(`LED toggle button clicked with state: ${state}`);
+            
+            const deviceIP = getBestDeviceIP();
+            const statusElement = document.getElementById("statusDisplay");
+            
+            console.log(`Using device IP: ${deviceIP}`);
+            
+            // Check if a valid IP was found
+            if (deviceIP === "No-IP-Available") {
+                console.log("No valid device IP available for LED control");
+                if (statusElement) {
+                    statusElement.innerHTML = `<i class="bi bi-exclamation-triangle"></i> Unable to control LED: No device IP available. Please connect to a device first.`;
+                    statusElement.className = "alert alert-warning text-center fs-5 p-3 mb-4";
+                }
+                return;
+            }
+            
+            // Skip all validation checks and just try to control the LED directly
+            // This allows the LED to be toggled even if the device appears offline
+            // Show pending status
+            if (statusElement) {
+                statusElement.innerHTML = `Setting LED to ${state.toUpperCase()}...`;
+                statusElement.className = "alert alert-info text-center fs-5 p-3 mb-4";
+            }
+            
+            // Fix for inverted LED logic on ESP32 hardware
+            // When user clicks "ON", we need to send "off" and vice versa
+            const invertedState = (state === "on") ? "off" : "on";
+            
+            console.log(`Direct toggle LED: Button=${state}, Sending=${invertedState} to ${deviceIP}`);
+            
+            // Assume the operation will succeed and update the button immediately
+            // This ensures visual feedback even if the network response is slow
+            if (typeof updateLedButtonLabel === 'function') {
+                updateLedButtonLabel(state === "on");
+            }
+            
+            // Also update the status message immediately - don't wait for network response
+            if (statusElement) {
+                statusElement.innerHTML = `LED turned ${state.toUpperCase()}`;
+                statusElement.className = "alert alert-success text-center fs-5 p-3 mb-4";
+            }
+            
+            // Create a flag to track if we got a successful response
+            let successfulResponse = false;
+            
+            // Make the first attempt - this is now just for the network operation
+            // We already updated the UI above
+            makeRequest(1);
+            
+            // Function to make request with retry logic
+            function makeRequest(attemptNumber) {
+                if (attemptNumber > 2 || successfulResponse) return; // Max 2 attempts
+                
+                console.log(`LED control attempt ${attemptNumber} for ${state}`);
+                
+                // Create an AbortController for timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+                
+                // Create special URL with cache-busting parameter to avoid caching issues
+                const url = `http://${deviceIP}/led?state=${invertedState}&t=${Date.now()}`;
+                
+                fetch(url, {
+                    mode: 'cors',
+                    method: 'GET',
+                    cache: 'no-cache',
+                    signal: controller.signal,
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*'
+                    }
+                })
+                .then(response => {
+                    clearTimeout(timeoutId);
+                    if (response.ok) {
+                        successfulResponse = true;
+                        console.log(`LED directly set to ${invertedState} (appears as ${state.toUpperCase()})`);
+                    } else {
+                        console.log(`Error setting LED: ${response.status}`);
+                        if (attemptNumber < 2) {
+                            // Try again
+                            setTimeout(() => makeRequest(attemptNumber + 1), 1000);
+                        }
+                    }
+                })
+                .catch(error => {
+                    clearTimeout(timeoutId);
+                    console.log(`Error setting LED (attempt ${attemptNumber}): ${error.message}`);
+                    
+                    if (attemptNumber < 2) {
+                        // Try again with a delay
+                        setTimeout(() => makeRequest(attemptNumber + 1), 1000);
+                    }
+                });
+            }
+        }
+        
+        // Make sure getBestDeviceIP is available in this context
+        if (typeof getBestDeviceIP !== 'function') {
+            window.getBestDeviceIP = function() {
+                // First check for explicitly saved device IP
+                const savedIP = localStorage.getItem("espIP") || localStorage.getItem("lastWorkingDeviceIP");
+                if (savedIP && savedIP !== "Unknown" && savedIP !== "Offline") {
+                    return savedIP;
+                }
+                
+                // Fall back to any 192.168.*.* address in the page
+                const bodyText = document.body.innerText;
+                const ipMatch = bodyText.match(/\b192\.168\.\d+\.\d+\b/);
+                if (ipMatch) {
+                    return ipMatch[0];
+                }
+                
+                // Get IP from any device row in the table
+                const ipCells = document.querySelectorAll("td:nth-child(4)");
+                for (const cell of ipCells) {
+                    const ip = cell.textContent.trim();
+                    if (ip && ip !== "Unknown" && ip !== "Offline" && !ip.startsWith("127.")) {
+                        return ip;
+                    }
+                }
+                
+                // If no valid IP found, return a more descriptive value
+                return "No-IP-Available";
+            };
+        }
+        
+        // Update the IP display when page loads
+        document.addEventListener("DOMContentLoaded", function() {
+            // No need to update IP display periodically anymore
+        });
+    </script>
+</body>
+</html> 

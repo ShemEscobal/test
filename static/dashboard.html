@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Add session manager script -->
+    <script src="session_manager.js"></script>
+    <!-- Other existing scripts -->
+    <script src="script.js" defer></script>
+    <script>
+        // Get token and check if admin
+        const token = localStorage.getItem('token');
+        const isAdmin = localStorage.getItem('isAdmin') === 'true';
+        
+        if (!token) {
+            // Not logged in
+            window.location.href = "/login";
+        } else if (isAdmin) {
+            // Admin user
+            window.location.href = "/static/admin_dashboard.html";
+        } else {
+            // Regular user
+            window.location.href = "/static/user.html";
+        }
+    </script>
+</head>
+<body>
+    <h1>IoT Dashboard</h1>
+    <p>Loading your dashboard...</p>
+    <p>If you are not redirected automatically, please click <a href="/static/user.html">here</a>.</p>
+</body>
+</html> 
