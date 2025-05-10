@@ -8,3 +8,4 @@ Flask-PyMongo==3.0.1
 pymongo==4.11.2
 waitress
 psutil
+streamlit
