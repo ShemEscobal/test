@@ -3029,10 +3029,9 @@ def run_simple_tests():
     return response
 
 # Start server
-if __name__ == "__main__":
-    # Use a more compatible approach that avoids signal handling issues
+if __name__ == "__main__" and os.environ.get('STREAMLIT_RUNNING') != 'true':
+    # Only run the server directly if not running under Streamlit
     from waitress import serve
-    import os
     import socket
     
     # Try to get the port from environment variable or use an alternative port
@@ -3053,3 +3052,6 @@ if __name__ == "__main__":
                 print(f"Failed to start server: {e}")
                 # If we've exhausted all attempts or got a different error, re-raise
                 raise
+elif __name__ == "__main__" and os.environ.get('STREAMLIT_RUNNING') == 'true':
+    print("Running under Streamlit - Flask server will not be started automatically.")
+    print("API endpoints will be available when this app is run directly (not through Streamlit).")
