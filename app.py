@@ -22,7 +22,7 @@ except ImportError:
     print("Warning: psutil not installed. Memory monitoring will be limited.")
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = xxLXxx
+app.config['SECRET_KEY'] = 'xxLXxx'
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Change from None to Lax
 app.config['SESSION_COOKIE_SECURE'] = False  # Set to False for local dev, True for production
 app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -47,7 +47,7 @@ def add_cors_headers(response):
     return response
 
 # Configure MongoDB - default to localhost
-app.config['MONGO_URI'] = MONGO_URI
+app.config['MONGO_URI'] = 'MONGO_URI'
 mongo = PyMongo(app)
 bcrypt = Bcrypt(app)
 
